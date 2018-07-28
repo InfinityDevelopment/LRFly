@@ -1,0 +1,6 @@
+name: LRFly
+main: us.infinitydev.lrf.LRFlyCore
+version: 1.0
+author: SentinelGaming
+description: Spawn flying plugin.
+depend: [WorldGuard, WorldEdit]
