@@ -13,8 +13,8 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -22,6 +22,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
+import net.md_5.bungee.api.ChatColor;
 
 public class LRFlyCore extends JavaPlugin implements Listener{
 	
@@ -40,9 +42,10 @@ public class LRFlyCore extends JavaPlugin implements Listener{
 	}
 	
 	@EventHandler
-	public void playerJoin(PlayerJoinEvent e) {
-		e.getPlayer().setAllowFlight(true);
-		return;
+	public void onQuit(PlayerQuitEvent e) {
+		if(flightList.contains(e.getPlayer().getUniqueId())) {
+			flightList.remove(e.getPlayer().getUniqueId());
+		}
 	}
 	
 	@EventHandler
@@ -62,7 +65,7 @@ public class LRFlyCore extends JavaPlugin implements Listener{
 			if(flightList.contains(p.getUniqueId())) {
 				flightList.remove(e.getPlayer().getUniqueId());
 				e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.valueOf(getConfig().getString("FlyEndSound")), 0.6f, 1.0f);
-				e.getPlayer().sendMessage(getConfig().getString("FlyEndMessage").replaceAll("(&([a-z0-9]))", "\u00A7$2"));
+				e.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("FlyEndMessage")));
 				e.getPlayer().setFlying(false);
 				e.setCancelled(true);
 				return;
@@ -85,11 +88,11 @@ public class LRFlyCore extends JavaPlugin implements Listener{
 		if(!(flightList.contains(e.getPlayer().getUniqueId()))) {
 			flightList.add(e.getPlayer().getUniqueId());
 			e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.valueOf(getConfig().getString("FlyStartSound")), 0.6f, 1.0f);
-			e.getPlayer().sendMessage(getConfig().getString("FlyStartMessage").replaceAll("(&([a-f0-9]))", "\u00A7$2"));
+			e.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("FlyStartMessage")));
 		}else {
 			flightList.remove(e.getPlayer().getUniqueId());
 			e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.valueOf(getConfig().getString("FlyEndSound")), 0.6f, 1.0f);
-			e.getPlayer().sendMessage(getConfig().getString("FlyEndMessage").replaceAll("(&([a-f0-9]))", "\u00A7$2"));
+			e.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("FlyEndMessage")));
 		}
 		
 		return;
@@ -119,7 +122,7 @@ public class LRFlyCore extends JavaPlugin implements Listener{
 					e.getPlayer().setFlying(false);
 					flightList.remove(p.getUniqueId());
 					p.playSound(p.getLocation(), Sound.valueOf(getConfig().getString("FlyEndSound")), 0.6f, 1.0f);
-					p.sendMessage(getConfig().getString("FlyEndMessage").replaceAll("(&([a-f0-9]))", "\u00A7$2"));
+					e.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("FlyEndMessage")));
 				}
 				
 				if(inSpawn == true) {
