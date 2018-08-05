@@ -27,7 +27,9 @@ import net.md_5.bungee.api.ChatColor;
 
 public class LRFlyCore extends JavaPlugin implements Listener{
 	
-	List<UUID> flightList = new ArrayList<UUID>();
+	List<UUID> out = new ArrayList<UUID>();
+	List<UUID> in = new ArrayList<UUID>()
+;	List<UUID> flightList = new ArrayList<UUID>();
 	public WorldGuardPlugin getWorldGuard() {
 		Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
 		if(plugin == null || !(plugin instanceof WorldGuardPlugin)) {
@@ -119,10 +121,19 @@ public class LRFlyCore extends JavaPlugin implements Listener{
 				}
 				
 				if(inSpawn == false) {
-					e.getPlayer().setFlying(false);
-					flightList.remove(p.getUniqueId());
-					p.playSound(p.getLocation(), Sound.valueOf(getConfig().getString("FlyEndSound")), 0.6f, 1.0f);
-					e.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("FlyEndMessage")));
+					if(out.contains(p.getUniqueId())) {
+						return;
+					}
+					
+					if(in.contains(p.getUniqueId())) {
+						e.getPlayer().setFlying(false);
+						flightList.remove(p.getUniqueId());
+						p.playSound(p.getLocation(), Sound.valueOf(getConfig().getString("FlyEndSound")), 0.6f, 1.0f);
+						e.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("FlyEndMessage")));
+						in.remove(p.getUniqueId());
+						out.add(p.getUniqueId());
+					}
+					
 				}
 				
 				if(inSpawn == true) {
@@ -184,10 +195,18 @@ public class LRFlyCore extends JavaPlugin implements Listener{
     					}
     				}
     				
-    				if(inSpawn != true && !(p.getGameMode().equals(GameMode.CREATIVE))) {
+    				if(inSpawn != true && !out.contains(p.getUniqueId())) {
+    					in.remove(p.getUniqueId());
+    					out.add(p.getUniqueId());
     					p.setAllowFlight(false);
-    				}else {
+    					return;
+    				}else if(inSpawn == true && !in.contains(p.getUniqueId())){
+    					out.remove(p.getUniqueId());
+    					in.add(p.getUniqueId());
     					p.setAllowFlight(true);
+    					return;
+    				}else {
+    					return;
     				}
                 }
 			}
